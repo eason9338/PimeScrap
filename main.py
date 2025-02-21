@@ -22,6 +22,7 @@ ua = UserAgent()
 # user_agent = ua.random
 
 print("current user-agent:", user_agent)
+print("--------------------------------")
 chrome_options = Options()
 chrome_options.add_argument(f"user-agent={user_agent}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
@@ -67,7 +68,7 @@ try:
     file_input = WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type=file]'))
     )
-    file_input.send_keys("/Users/USER/Documents/DCG/程式語言/Grad_tem/DeepFace/pic/meA.png")
+    file_input.send_keys("D:/D-Coding/Grad/PimeScrap/meA.png")
     random_sleep(3, 6)
 
     # 滾動頁面
@@ -75,33 +76,30 @@ try:
     random_sleep(1, 3)
     driver.execute_script("window.scrollTo(0, 0);")
 
-    time.sleep(60)
+    time.sleep(3)
 
-    # 點擊勾選條款
-    agreement1_xpath = '#app > div.wrapper.mobile-fullscreen-mode.mobile-full-height > div > div > div > div > div > div > div.permissions > div:nth-child(1) > label > input[type=checkbox]'
-    agreement2_xpath = '#app > div.wrapper.mobile-fullscreen-mode.mobile-full-height > div > div > div > div > div > div > div.permissions > div:nth-child(2) > label > input[type=checkbox]'
-    agreement3_xpath = '#app > div.wrapper.mobile-fullscreen-mode.mobile-full-height > div > div > div > div > div > div > div.permissions > div:nth-child(3) > label > input[type=checkbox]'
-    submit_xpath = '#app > div.wrapper.mobile-fullscreen-mode.mobile-full-height > div > div > div > div > div > div > button'
+    print("----------------Buckle up----------------")
 
-    # 找到勾選框
-    checkbox1 = WebDriverWait(driver, 15).until(EC.presence_of_element_located((By.CSS_SELECTOR, agreement1_xpath)))
-    scroll_to_element(driver, checkbox1)  # 滾動到元素
-    checkbox1.click()
-    js_click(driver, checkbox1)  # 改用 JavaScript 點擊
-    print("first")
-    random_sleep(1, 8)
+    # 定位所有勾選框
+    checkboxes = WebDriverWait(driver, 20).until(
+        EC.presence_of_all_elements_located((By.XPATH, "//label[@class='checkbox']/input[@type='checkbox']"))
+    )
 
-    # WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, agreement1_xpath))).click()
-    # print("first")
-    # random_sleep(1, 8)
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, agreement2_xpath))).click()
-    print("second")
-    random_sleep(1, 8)
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, agreement3_xpath))).click()
-    print("third")
-    random_sleep(1, 8)
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable((By.CSS_SELECTOR, submit_xpath))).click()
-    print("fourth")
+    # 點擊每一個勾選框
+    for checkbox in checkboxes:
+        checkbox.click()
+        print("checkbox clicked")
+        random_sleep(1, 5)
+
+    print("----------------Move on----------------")
+    random_sleep(1, 5)
+
+    # 重新定位並使用 JavaScript 點擊提交按鈕
+    submit_button = WebDriverWait(driver, 20).until(
+        EC.presence_of_element_located((By.XPATH, "/html/body/div[5]/div/div/div/div[1]/div/div[1]/button"))
+    )
+    print("----------------Click----------------")
+    driver.execute_script("arguments[0].click();", submit_button)
     random_sleep(5, 8)
 
     # 取得結果
