@@ -14,7 +14,7 @@ driver = webdriver.Chrome()
 print(driver.capabilities['browserVersion'])  # 瀏覽器版本
 print(driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0])  # ChromeDriver 版本
 
-# 設定 Mozilla User-Agent
+# 設定 Mozilla User-Agent 這個是不會被擋的agent
 user_agent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
 ua = UserAgent()
 
@@ -33,7 +33,7 @@ driver = webdriver.Chrome(options=chrome_options)
 
 def scroll_to_element(driver, element):
     driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
-    time.sleep(random.uniform(1, 3))  # 模擬用戶行為
+    time.sleep(random.uniform(1, 3))
 
 def js_click(driver, element):
     driver.execute_script("arguments[0].click();", element)
@@ -91,18 +91,22 @@ try:
         print("checkbox clicked")
         random_sleep(1, 5)
 
+    random_sleep(3, 6)  # 等待畫面穩定
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
     print("----------------Move on----------------")
     random_sleep(1, 5)
+
 
     # 重新定位並使用 JavaScript 點擊提交按鈕
     submit_button = WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.XPATH, "/html/body/div[5]/div/div/div/div[1]/div/div[1]/button"))
     )
+    print(driver.execute_script("return window.getComputedStyle(arguments[0]).display;", submit_button))
     print("----------------Click----------------")
     driver.execute_script("arguments[0].click();", submit_button)
     random_sleep(5, 8)
 
-    # 取得結果
+    # 取得結果 ------Steven的原始碼，曾經可以執行
     currenturl = driver.current_url
     resultsXPATH = '//*[@id="results"]/div/div/div[3]/div/div/div[1]/div/div[1]/button/div/span/span'
     results = WebDriverWait(driver, 10).until(
