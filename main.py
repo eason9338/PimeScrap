@@ -7,8 +7,17 @@ from selenium.webdriver.common.action_chains import ActionChains
 import time
 import random
 from fake_useragent import UserAgent
-
+from bs4 import BeautifulSoup
 from selenium import webdriver
+import requests
+from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.chrome.service import Service as ChromeService
+
+
+
+image = "?.png"
+
 
 driver = webdriver.Chrome()
 print(driver.capabilities['browserVersion'])  # 瀏覽器版本
@@ -26,6 +35,8 @@ print("--------------------------------")
 chrome_options = Options()
 chrome_options.add_argument(f"user-agent={user_agent}")
 chrome_options.add_argument("--disable-blink-features=AutomationControlled")
+chrome_options.add_argument("--ignore-certificate-errors")
+chrome_options.add_argument("--ignore-ssl-errors")
 
 
 # 初始化 WebDriver
@@ -68,7 +79,8 @@ try:
     file_input = WebDriverWait(driver, 20).until(
         EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type=file]'))
     )
-    file_input.send_keys("D:/D-Coding/Grad/PimeScrap/meA.png")
+    file_input.send_keys(image)
+
     random_sleep(3, 6)
 
     # 滾動頁面
@@ -85,11 +97,13 @@ try:
         EC.presence_of_all_elements_located((By.XPATH, "//label[@class='checkbox']/input[@type='checkbox']"))
     )
 
+    
     # 點擊每一個勾選框
-    for checkbox in checkboxes:
+    for checkbox in checkboxes[:3]:
         checkbox.click()
         print("checkbox clicked")
         random_sleep(1, 5)
+        
 
     random_sleep(3, 6)  # 等待畫面穩定
     WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
@@ -108,13 +122,15 @@ try:
 
     # 取得結果 ------Steven的原始碼，曾經可以執行
     currenturl = driver.current_url
-    resultsXPATH = '//*[@id="results"]/div/div/div[3]/div/div/div[1]/div/div[1]/button/div/span/span'
-    results = WebDriverWait(driver, 10).until(
-        EC.element_to_be_clickable((By.XPATH, resultsXPATH))
-    ).text
-
-    print("Results:", results)
-    print("URL:", currenturl)
+    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    
+    # 使用 XPath 選取所有 span 元素，其文字內容以 http 或 https 開頭
+    url_elements = driver.find_elements(By.XPATH, "//span[starts-with(text(),'http')]")
+    
+    # 提取文字內容
+    urls = [element.text.strip() for element in url_elements if element.text.strip() != ""]
+    
+    print(urls)
 
 except Exception as e:
     print(f"發生錯誤: {e}")
@@ -122,3 +138,5 @@ except Exception as e:
 
 finally:
     driver.quit()
+
+
