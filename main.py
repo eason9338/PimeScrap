@@ -16,7 +16,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 
 
 
-image = "?.png"
+image = "/Users/USER/Documents/DCG/程式語言/Grad_tem/PimeScrap/meA.png"
 
 
 driver = webdriver.Chrome()
@@ -140,3 +140,4 @@ finally:
     driver.quit()
 
 
+# ['https://i2.chinanews.com/', 'https://assets.hmetro.com', 'https://iteroni.com/vi/4Z', 'https://static.ctwant.com', 'https://www.foxwq.com/Pub', 'https://img.epochtimes.co', 'https://cdn2.ettoday.net/', 'https://www.upmedia.mg/up', 'https://jurnalapps.co.id/', 'https://mmbiz.qpic.cn/mmb', 'https://img-cdn.zzal.blog', 'http://nwpwq.com/ueditor/', 'https://globalcharity.uwe', 'https://live.staticflickr', 'https://files.ejan.co/wp-']
