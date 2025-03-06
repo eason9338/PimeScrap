@@ -16,7 +16,7 @@ from selenium.webdriver.chrome.service import Service as ChromeService
 
 
 
-image = "/Users/USER/Documents/DCG/程式語言/Grad_tem/PimeScrap/meA.png"
+image = "/Users/akiraeason/Desktop/PimeScrap/meA.png"
 
 
 driver = webdriver.Chrome()
