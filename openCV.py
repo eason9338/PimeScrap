@@ -2,22 +2,13 @@ import cv2
 import os
 from pathlib import Path
 
-def extract_faces_from_id_cards(input_folder, output_folder, min_face_size=(50, 50), min_neighbors=8, scale_factor=1.1, confidence_threshold=0.6):
-    """
-    從身分證照片中擷取人臉區域並儲存
-    
-    參數:
-        input_folder: 存放身分證照片的資料夾路徑
-        output_folder: 儲存擷取出的人臉照片的資料夾路徑
-    """
-    # 確保輸出資料夾存在
+def extract_faces_from_id_cards(input_folder, output_folder, min_face_size=(50, 50), min_neighbors=8, scale_factor=1.1):
+
     os.makedirs(output_folder, exist_ok=True)
     
-    # 載入預訓練的人臉檢測器
     face_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + 'haarcascade_frontalface_default.xml')
     
-    # 取得所有圖片檔案
-    extensions = ['.jpg', '.jpeg', '.png', '.bmp']
+    extensions = ['.jpg','.png']
     image_files = []
     for ext in extensions:
         image_files.extend(list(Path(input_folder).glob(f'*{ext}')))
@@ -70,9 +61,9 @@ def extract_faces_from_id_cards(input_folder, output_folder, min_face_size=(50, 
             
             for i, (x, y, w, h) in enumerate(faces):
                 # 增加臉部周圍的邊界 - 增加更大的邊界以確保包含頭髮和下巴
-                padding_top = int(h * 0.4)      # 頭部需要更多空間
-                padding_bottom = int(h * 0.3)    # 下巴也需要一些空間
-                padding_sides = int(w * 0.3)     # 兩側適當留白
+                padding_top = int(h * 0.4)
+                padding_bottom = int(h * 0.3)
+                padding_sides = int(w * 0.3) 
                 
                 # 計算新的邊界，同時確保不超出圖片範圍
                 new_x = max(0, x - padding_sides)
@@ -102,7 +93,6 @@ if __name__ == "__main__":
         min_face_size=(50, 50),  # 最小人臉尺寸
         min_neighbors=8,         # 檢測所需的鄰近區域數量
         scale_factor=1.1,        # 圖像縮放因子
-        confidence_threshold=0.6  # 信心閾值
     )
     
     print("處理完成!")
