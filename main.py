@@ -1,143 +1,69 @@
-from selenium import webdriver
-from selenium.webdriver.chrome.options import Options
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.common.action_chains import ActionChains
-import time
-import random
-from fake_useragent import UserAgent
-from bs4 import BeautifulSoup
-from selenium import webdriver
-import requests
-from selenium import webdriver
-from selenium.webdriver.common.by import By
-from selenium.webdriver.chrome.service import Service as ChromeService
+from pimeyes_scraper import PimeyesScraper
+from tavily_extractor import TavilyExtractor
+from gemini_analyzer import GeminiAnalyzer
+from url_retrieve import UrlRetrieve
 
-
-
-image = "/Users/akiraeason/Desktop/PimeScrap/meA.png"
-
-
-driver = webdriver.Chrome()
-print(driver.capabilities['browserVersion'])  # 瀏覽器版本
-print(driver.capabilities['chrome']['chromedriverVersion'].split(' ')[0])  # ChromeDriver 版本
-
-# 設定 Mozilla User-Agent 這個是不會被擋的agent
-user_agent = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0.0.0 Mobile Safari/537.36"
-ua = UserAgent()
-
-# 使用隨機的 User-Agent
-# user_agent = ua.random
-
-print("current user-agent:", user_agent)
-print("--------------------------------")
-chrome_options = Options()
-chrome_options.add_argument(f"user-agent={user_agent}")
-chrome_options.add_argument("--disable-blink-features=AutomationControlled")
-chrome_options.add_argument("--ignore-certificate-errors")
-chrome_options.add_argument("--ignore-ssl-errors")
-
-
-# 初始化 WebDriver
-driver = webdriver.Chrome(options=chrome_options)
-
-def scroll_to_element(driver, element):
-    driver.execute_script("arguments[0].scrollIntoView({behavior: 'smooth', block: 'center'});", element)
-    time.sleep(random.uniform(1, 3))
-
-def js_click(driver, element):
-    driver.execute_script("arguments[0].click();", element)
-
-def random_sleep(min_time=2, max_time=6):
-    time.sleep(random.uniform(min_time, max_time))
-
-def simulate_mouse(driver, element):
-    action = ActionChains(driver)
-    action.move_to_element(element).pause(random.uniform(0.5, 2)).click().perform()
-
-try:
-    driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})")
-    driver.get("https://pimeyes.com/en")
-    random_sleep(3, 7)
-
-    # 點擊 Cookie 按鈕
-    cookie_button = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.ID, "CybotCookiebotDialogBodyLevelButtonLevelOptinAllowAll"))
-    )
-    simulate_mouse(driver, cookie_button)
-    random_sleep(2, 5)
-
-    # 點擊上傳圖片按鈕
-    upload_button = WebDriverWait(driver, 20).until(
-        EC.element_to_be_clickable((By.XPATH, '//*[@id="hero-section"]/div/div[1]/div/div/div[1]/button[2]'))
-    )
-    simulate_mouse(driver, upload_button)
-    random_sleep(3, 6)
-
-    # 上傳圖片
-    file_input = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.CSS_SELECTOR, 'input[type=file]'))
-    )
-    file_input.send_keys(image)
-
-    random_sleep(3, 6)
-
-    # 滾動頁面
-    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-    random_sleep(1, 3)
-    driver.execute_script("window.scrollTo(0, 0);")
-
-    time.sleep(3)
-
-    print("----------------Buckle up----------------")
-
-    # 定位所有勾選框
-    checkboxes = WebDriverWait(driver, 20).until(
-        EC.presence_of_all_elements_located((By.XPATH, "//label[@class='checkbox']/input[@type='checkbox']"))
-    )
-
+def main():
+    # 取得使用者輸入
+    borrower_name = input("請輸入借款人姓名 (預設: 黃煒傑): ").strip() or "黃煒傑"
     
-    # 點擊每一個勾選框
-    for checkbox in checkboxes[:3]:
-        checkbox.click()
-        print("checkbox clicked")
-        random_sleep(1, 5)
+    # 設定查詢 URL（可以根據實際情況調整）
+    search_url = "https://pimeyes.com/en/results/O9y_2502230jp5ugwnws8htmh9c1365a4?query=040007079f6fe7fb0000032f7fefe7ef"
+    image_url = '/Users/akiraeason/Desktop/PimeScrap/meB.png'
+    # 取得處理的圖片數量限制
+    try:
+        image_limit = int(input("請輸入要處理的圖片數量 (預設: 10): ").strip() or "10")
+    except ValueError:
+        image_limit = 10
+        print("輸入無效，使用預設值 10")
+    
+    # 創建類別實例
+    pimeyes_scraper = PimeyesScraper()
+    tavily_extractor = TavilyExtractor()
+    gemini_analyzer = GeminiAnalyzer()
+    url_retrieve = UrlRetrieve()
+    
+    print(f"開始為借款人 {borrower_name} -- 執行信用評分分析流程")
+    print("=" * 50)
+    
+    print("\n🔍 階段 0: 上傳圖片至 Pimeyes 圖像搜尋...")
+    search_url = url_retrieve.run(image_url)
+
+    # 第一階段：Pimeyes 圖像搜尋
+    print(f"\n🔍 階段 1: 執行 Pimeyes 圖像搜尋..., URL: {search_url}")
+    scraping_success = pimeyes_scraper.run(search_url, image_limit)
+    
+    if not scraping_success:
+        print("❌ Pimeyes 搜尋失敗，無法繼續後續流程")
+        return
         
-
-    random_sleep(3, 6)  # 等待畫面穩定
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
-    print("----------------Move on----------------")
-    random_sleep(1, 5)
-
-
-    # 重新定位並使用 JavaScript 點擊提交按鈕
-    submit_button = WebDriverWait(driver, 20).until(
-        EC.presence_of_element_located((By.XPATH, "/html/body/div[5]/div/div/div/div[1]/div/div[1]/button"))
-    )
-    print(driver.execute_script("return window.getComputedStyle(arguments[0]).display;", submit_button))
-    print("----------------Click----------------")
-    driver.execute_script("arguments[0].click();", submit_button)
-    random_sleep(5, 8)
-
-    # 取得結果 ------Steven的原始碼，曾經可以執行
-    currenturl = driver.current_url
-    WebDriverWait(driver, 10).until(EC.presence_of_element_located((By.TAG_NAME, "body")))
+    print("✅ Pimeyes 搜尋完成")
+    print("=" * 50)
     
-    # 使用 XPath 選取所有 span 元素，其文字內容以 http 或 https 開頭
-    url_elements = driver.find_elements(By.XPATH, "//span[starts-with(text(),'http')]")
+    # 第二階段：Tavily 內容提取
+    print("\n📄 階段 2: 使用 Tavily 提取網頁內容...")
+    extraction_success = tavily_extractor.extract_content()
     
-    # 提取文字內容
-    urls = [element.text.strip() for element in url_elements if element.text.strip() != ""]
+    if not extraction_success:
+        print("❌ Tavily 提取失敗，無法繼續後續流程")
+        return
+        
+    print("✅ Tavily 內容提取完成")
+    print("=" * 50)
     
-    print(urls)
+    # 第三階段：Gemini 分析
+    print("\n🧠 階段 3: 使用 Gemini 分析內容...")
+    analysis_success = gemini_analyzer.run_analysis(borrower_name)
+    
+    if not analysis_success:
+        print("❌ Gemini 分析失敗")
+        return
+        
+    print("✅ Gemini 分析完成")
+    print("=" * 50)
+    
+    print(f"\n🎉 {borrower_name} 的信用評分分析流程全部完成!")
 
-except Exception as e:
-    print(f"發生錯誤: {e}")
-    driver.quit()
 
-finally:
-    driver.quit()
-
-
-# ['https://i2.chinanews.com/', 'https://assets.hmetro.com', 'https://iteroni.com/vi/4Z', 'https://static.ctwant.com', 'https://www.foxwq.com/Pub', 'https://img.epochtimes.co', 'https://cdn2.ettoday.net/', 'https://www.upmedia.mg/up', 'https://jurnalapps.co.id/', 'https://mmbiz.qpic.cn/mmb', 'https://img-cdn.zzal.blog', 'http://nwpwq.com/ueditor/', 'https://globalcharity.uwe', 'https://live.staticflickr', 'https://files.ejan.co/wp-']
+if __name__ == "__main__":
+    main()
